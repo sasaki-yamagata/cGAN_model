@@ -56,7 +56,7 @@ class GanDataset(data.Dataset):
         self.y_data = y_data
 
     def __len__(self):
-        return len(self.x_data.shape[0])
+        return self.x_data.shape[0]
     
     def __getitem__(self, index):
         return self.x_data[index, :], self.y_data[index, :]
