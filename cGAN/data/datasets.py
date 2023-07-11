@@ -15,8 +15,7 @@ class CreateData:
         data = data.dropna()
         data = data.values
         smiles_l = (data[:, 1])
-        fps_data = self._convert_fps(smiles_l)
-        self.x_data = self._add_noize(fps_data, 100)
+        self.x_data = self._convert_fps(smiles_l)
         self.y_data = torch.tensor(np.array(data[:, 2:], dtype="float32"))
 
     @staticmethod
@@ -39,14 +38,14 @@ class CreateData:
         fps_norm = torch.from_numpy(fps_norm)
         return fps_norm
     
-    @staticmethod
-    def _add_noize(fps_data, noize_size):
-        noize_shape = (fps_data.shape[0], noize_size)
-        z = np.random.randn(noize_shape[0] * noize_shape[1])
-        z =  z.reshape(noize_shape)
-        x_data = np.concatenate([fps_data, z], axis=1)
-        x_data = torch.from_numpy(x_data)
-        return x_data
+    # @staticmethod
+    # def _add_noize(fps_data, noize_size):
+    #     noize_shape = (fps_data.shape[0], noize_size)
+    #     z = np.random.randn(noize_shape[0] * noize_shape[1])
+    #     z =  z.reshape(noize_shape)
+    #     x_data = np.concatenate([fps_data, z], axis=1)
+    #     x_data = torch.from_numpy(x_data)
+    #     return x_data
         
 
 
