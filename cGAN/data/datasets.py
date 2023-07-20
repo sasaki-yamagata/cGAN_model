@@ -36,18 +36,8 @@ class CreateData:
         fps_l_min = np.amin(fps_l)
         fps_norm = ((fps_l - fps_l_min) / (fps_l_max - fps_l_min))
         fps_norm = torch.from_numpy(fps_norm)
-        return fps_norm
-    
-    # @staticmethod
-    # def _add_noize(fps_data, noize_size):
-    #     noize_shape = (fps_data.shape[0], noize_size)
-    #     z = np.random.randn(noize_shape[0] * noize_shape[1])
-    #     z =  z.reshape(noize_shape)
-    #     x_data = np.concatenate([fps_data, z], axis=1)
-    #     x_data = torch.from_numpy(x_data)
-    #     return x_data
+        return fps_norm   
         
-
 
 class GanDataset(data.Dataset):
     def __init__(self, x_data, y_data):

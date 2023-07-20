@@ -42,19 +42,16 @@ def generate_real_samples(x_data, y_data):
     return real_inputs, real_labels
 
 def generate_fake_samples(generator, x_data, noize_size):
-    noize_shape = (x_data.shape[0], noize_size)
-    noise = np.random.randn(noize_shape[0] * noize_shape[1])
-    noise =  noise.reshape(noize_shape)
-    x_noise = np.concatenate([x_data, noise], axis=1)
-    x_noise = torch.from_numpy(x_noise).float()
+    noise = generate_noize(x_data.shape[0], noize_size)
+    x_noise = torch.cat((x_data, noise), dim=1)
     fake_y_data = generator(x_noise)
     fake_inputs = torch.cat((x_data, fake_y_data), dim=1)
     fake_labels = torch.zeros(fake_inputs.shape[0], 1)
     return fake_inputs, fake_labels
 
-    
-
-
+def generate_noize(n_data, noise_size):
+    noise = torch.randn(n_data, noise_size).float()
+    return noise
 
 
 

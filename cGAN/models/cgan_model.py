@@ -11,14 +11,15 @@ class Discriminator(nn.Module):
         # self.fc2 = nn.Linear(600, 1)
         self.dis = nn.Sequential(
             nn.Linear(n_input, 600),
-            nn.BatchNorm1d(600),
+            nn.Dropout(0.15),
             nn.LeakyReLU(inplace=True),
             nn.Linear(600, 1)
+            # nn.Sigmoid()
         )
     
     def forward(self, x):
         x = self.dis(x)
-
+        
         # print(x.shape)
         # x = self.fc1(x)
         # x = self.norm(x)
