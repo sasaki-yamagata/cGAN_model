@@ -1,7 +1,7 @@
 
 def get_config(debug=False):
     config = {
-        "n_epoch": 12,
+        "n_epoch": 10000,
         "batch_size": 128,
         "noise_size": 100,
         "lr": 0.001,

@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from torch import nn
 from torch.utils.data import DataLoader
 from torch import optim
@@ -36,19 +37,18 @@ def main(file_path):
         ) for phase in ["train", "test"]
     }
 
-    # criterion = nn.BCEWithLogitsLoss()
-    criterion = nn.MSELoss()
+    criterion = nn.BCEWithLogitsLoss()
+    # criterion = nn.MSELoss()
     d_model = Discriminator(d_input_num)
     g_model = Generator(g_input_num, g_output_num)
     d_optimizer = optim.Adam(d_model.parameters(), lr=config["lr"])
     g_optimizer = optim.Adam(g_model.parameters(), lr=config["lr"])
     
-    for epoch in range(config["n_epoch"]):
-        history = {"d_train_loss" : [],
+    history = {"d_train_loss" : [],
                    "g_train_loss" : [],
                    "d_test_loss" : [],
                    "g_test_loss" : []}
-        
+    for epoch in range(config["n_epoch"]):
         d_loss_accum = 0
         g_loss_accum = 0
         for phase in ["train", "test"]:
@@ -64,26 +64,37 @@ def main(file_path):
                 with torch.autograd.set_detect_anomaly(False):
                     with torch.set_grad_enabled(phase == "train"):
 
-                        # Discriminatorの学習
+                        # ---------------------
+                        #  Discriminatorの学習
+                        # ---------------------
+                        d_optimizer.zero_grad()
                         real_inputs, real_labels = generate_real_samples(x_data, y_data)
                         real_outputs = d_model(real_inputs)
-                        d_loss = criterion(real_outputs, real_labels)
-                        
+                        d_loss_real = criterion(real_outputs, real_labels)
+
+                        fake_inputs, fake_labels = generate_fake_samples(g_model, x_data, config["noise_size"])
+                        fake_outputs = d_model(fake_inputs.detach())
+                        d_loss_fake = criterion(fake_outputs, fake_labels)
+
+                        d_loss = d_loss_real + d_loss_fake
+
                         # trainのときのみ重み更新
                         if phase == "train":
-                            d_optimizer.zero_grad()
                             d_loss.backward()
                             d_optimizer.step()
                         d_loss_accum += d_loss * config["batch_size"]
 
-                        # Generatorの学習
-                        fake_inputs, fake_labels = generate_fake_samples(g_model, x_data, config["noise_size"])
+                        # ---------------------
+                        #  Generatorの学習
+                        # ---------------------
+                        g_optimizer.zero_grad()
+                        fake_inputs, _ = generate_fake_samples(g_model, x_data, config["noise_size"])
+                        fake_labels = torch.ones(fake_inputs.shape[0], 1)
                         fake_outputs = d_model(fake_inputs)
                         g_loss = criterion(fake_outputs, fake_labels)
-                        
+
                         # trainのときのみ重み更新
                         if phase == "train":
-                            g_optimizer.zero_grad()
                             g_loss.backward()
                             g_optimizer.step()
                         g_loss_accum += g_loss * config["batch_size"]
@@ -130,6 +141,9 @@ def main(file_path):
             fig.tight_layout()
             plt.savefig(f"result_{phase}.png")
         
+    # save
+    pd.DataFrame(history).to_csv("history.csv", index=False)
+    torch.save(g_model.state_dict(), "generator.pth")
 
 
 
